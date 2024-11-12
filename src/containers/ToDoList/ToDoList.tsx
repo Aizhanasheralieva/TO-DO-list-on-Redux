@@ -1,11 +1,16 @@
-import React, { useState } from "react";
-import { addToDoList, writeNewTask } from "./ToDoListSlice.ts";
-import { AppDispatch } from "../../app/store.ts";
-import { useDispatch } from "react-redux";
+import React, {useEffect, useState} from "react";
+import {addToDoList, fetchToDoLists, changeToDoList, deleteToDoList} from "./ToDoListSlice.ts";
+import {AppDispatch, RootState} from "../../app/store.ts";
+import {useDispatch, useSelector} from "react-redux";
 
 const ToDoList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [newTask, setNewTask] = useState<{ title: string }>({ title: "" });
+  const {toDoLists} = useSelector((state: RootState) => state.toDoLists);
+
+  useEffect(() => {
+    dispatch(fetchToDoLists());
+  }, [dispatch]);
 
   const changeTask = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTask((prevState) => {
@@ -22,14 +27,18 @@ const ToDoList = () => {
       alert("Заполните все поля!");
     }
 
-    try {
-      dispatch(writeNewTask({ id: "", title: newTask.title, status: false }));
-      await dispatch(addToDoList(newTask.title));
-    } catch (error) {
-      console.error(error);
-    }
 
+      // await dispatch(writeNewTask({ id: "", title: newTask.title, status: false }));
+      await dispatch(addToDoList(newTask.title));
     setNewTask({ title: "" });
+  };
+
+  const controlChangeOfToDoList = (id: string) => {
+    dispatch(changeToDoList(id));
+  };
+
+  const controlDeleteToDoList = (id: string) => {
+    dispatch(deleteToDoList(id));
   };
 
   return (
@@ -54,6 +63,21 @@ const ToDoList = () => {
           </button>
         </div>
       </form>
+        <ul>
+          {toDoLists.map((toDoList) => (
+              <li className="list-unstyled mb-2" key={toDoList.id}>
+                <input
+                    className="me-2"
+                    type="checkbox"
+                    checked={toDoList.status}
+                    onChange={() => controlChangeOfToDoList(toDoList.id)}
+                />
+                {toDoList.title}
+                <button onClick={() => controlDeleteToDoList(toDoList.id)} className="btn btn-danger btn-sm ms-2">Delete</button>
+
+              </li>
+          ))}
+        </ul>
     </div>
   );
 };
