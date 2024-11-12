@@ -1,10 +1,10 @@
 import ToDoList from "./containers/ToDoList/ToDoList.tsx";
 
 const App = () => {
-  return(
-      <>
-        <ToDoList/>
-      </>
+  return (
+    <>
+      <ToDoList />
+    </>
   );
 };
 

@@ -1,15 +1,16 @@
-import {createSlice} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axiosApi from "../../axiosAPI.ts";
 
-type ToDoList = {
-    id: number;
-    title: string;
-    status: boolean;
+interface ToDoList {
+  id?: string;
+  title: string;
+  status: boolean;
 }
 
 interface ToDoListState {
-    toDoLists: ToDoList[],
-    isLoading: boolean,
-    error: false,
+  toDoLists: ToDoList[];
+  isLoading: boolean;
+  error: false;
 }
 
 const initialState: ToDoListState = {
@@ -18,15 +19,46 @@ const initialState: ToDoListState = {
   error: false,
 };
 
+// export const fetchToDoList = createAsyncThunk('toDoLists/fetchToDoList', async () => {
+//     const {data: toDoLists} = await axiosApi<string | null>('toDoLists.json');
+//
+// });
+
+export const addToDoList = createAsyncThunk(
+  "toDoLists/addToDoList",
+  async (title: string) => {
+    const response = await axiosApi.post("/toDoLists.json", {
+      title,
+      status: false,
+    });
+    return { name: response.data.name };
+  },
+);
+
 export const toDoListSlice = createSlice({
-  name: 'toDoLists',
+  name: "toDoLists",
   initialState,
-  reducers: {},
-    extraReducers: (builder) => {
-      builder
-          .addCase()
-    }
+  reducers: {
+    writeNewTask: (state, action: PayloadAction<ToDoList>) => {
+      state.toDoLists.push(action.payload);
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(addToDoList.pending, (state) => {
+        state.isLoading = true;
+        state.error = false;
+      })
+      .addCase(addToDoList.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.toDoLists = action.payload;
+      })
+      .addCase(addToDoList.rejected, (state) => {
+        state.isLoading = false;
+        state.error = true;
+      });
+  },
 });
 
 export const toDoListReducer = toDoListSlice.reducer;
-// export {} = toDoListSlice.actions;
+export const { writeNewTask } = toDoListSlice.actions;
