@@ -1,12 +1,17 @@
-import React, {useEffect, useState} from "react";
-import {addToDoList, fetchToDoLists, changeToDoList, deleteToDoList} from "./ToDoListSlice.ts";
-import {AppDispatch, RootState} from "../../app/store.ts";
-import {useDispatch, useSelector} from "react-redux";
+import React, { useEffect, useState } from "react";
+import {
+  addToDoList,
+  fetchToDoLists,
+  changeToDoList,
+  deleteToDoList,
+} from "./ToDoListSlice.ts";
+import { AppDispatch, RootState } from "../../app/store.ts";
+import { useDispatch, useSelector } from "react-redux";
 
 const ToDoList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [newTask, setNewTask] = useState<{ title: string }>({ title: "" });
-  const {toDoLists} = useSelector((state: RootState) => state.toDoLists);
+  const { toDoLists } = useSelector((state: RootState) => state.toDoLists);
 
   useEffect(() => {
     dispatch(fetchToDoLists());
@@ -25,11 +30,12 @@ const ToDoList = () => {
 
     if (newTask.title.trim().length === 0) {
       alert("Заполните все поля!");
+      return;
     }
 
+    await dispatch(addToDoList(newTask.title));
 
-      // await dispatch(writeNewTask({ id: "", title: newTask.title, status: false }));
-      await dispatch(addToDoList(newTask.title));
+    await dispatch(fetchToDoLists());
     setNewTask({ title: "" });
   };
 
@@ -63,21 +69,25 @@ const ToDoList = () => {
           </button>
         </div>
       </form>
-        <ul>
-          {toDoLists.map((toDoList) => (
-              <li className="list-unstyled mb-2" key={toDoList.id}>
-                <input
-                    className="me-2"
-                    type="checkbox"
-                    checked={toDoList.status}
-                    onChange={() => controlChangeOfToDoList(toDoList.id)}
-                />
-                {toDoList.title}
-                <button onClick={() => controlDeleteToDoList(toDoList.id)} className="btn btn-danger btn-sm ms-2">Delete</button>
-
-              </li>
-          ))}
-        </ul>
+      <ul>
+        {toDoLists.map((toDoList) => (
+          <li className="list-unstyled mb-2" key={toDoList.id}>
+            <input
+              className="me-2"
+              type="checkbox"
+              checked={toDoList.status}
+              onChange={() => controlChangeOfToDoList(toDoList.id)}
+            />
+            {toDoList.title}
+            <button
+              onClick={() => controlDeleteToDoList(toDoList.id)}
+              className="btn btn-danger btn-sm ms-2"
+            >
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
